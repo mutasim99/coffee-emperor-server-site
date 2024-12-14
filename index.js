@@ -31,18 +31,19 @@ async function run() {
 
         const database = client.db("coffedb");
         const coffiesCollection = database.collection("coffies");
-        
+        const usersCollections = database.collection("users")
 
-        app.get('/coffe', async(req, res)=>{
+
+        app.get('/coffe', async (req, res) => {
             const cursor = coffiesCollection.find()
-            const result =await cursor.toArray()
+            const result = await cursor.toArray()
             res.send(result)
-            
+
         })
 
-        app.get('/coffe/:id', async(req, res)=>{
+        app.get('/coffe/:id', async (req, res) => {
             const id = req.params.id
-            const query = {_id: new ObjectId(id)}
+            const query = { _id: new ObjectId(id) }
             const result = await coffiesCollection.findOne(query)
             res.send(result)
         })
@@ -51,22 +52,22 @@ async function run() {
             const coffee = req.body
             const result = await coffiesCollection.insertOne(coffee)
             res.send(result)
-            
+
         })
 
-        app.put('/coffe/:id', async(req, res)=>{
+        app.put('/coffe/:id', async (req, res) => {
             const id = req.params.id
             const coffe = req.body
-            const filter = {_id: new ObjectId(id)}
+            const filter = { _id: new ObjectId(id) }
             const options = { upsert: true };
             const updatedCoffe = {
 
-                $set:{
+                $set: {
                     name: coffe.name,
-                    quantity:coffe.quantity,
-                    supplier:coffe.supplier,
-                    taste:coffe.taste,
-                    category:coffe.category,
+                    quantity: coffe.quantity,
+                    supplier: coffe.supplier,
+                    taste: coffe.taste,
+                    category: coffe.category,
                     details: coffe.details,
                     photo: coffe.photo
                 }
@@ -75,11 +76,52 @@ async function run() {
             res.send(result)
         })
 
-        app.delete('/coffe/:id', async(req, res)=>{
+        app.delete('/coffe/:id', async (req, res) => {
             const id = req.params.id;
             console.log("deleted", id);
-            const query = {_id: new ObjectId(id)}
+            const query = { _id: new ObjectId(id) }
             const result = await coffiesCollection.deleteOne(query)
+            res.send(result)
+        })
+
+
+        //users collection
+
+        app.get('/users', async (req, res) => {
+            const result = await usersCollections.find().toArray();
+            res.send(result)
+
+        })
+
+        app.get('/users/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) }
+            const result = await usersCollections.findOne(query);
+            res.send(result)
+        })
+
+        app.patch('/users', async (req, res) => {
+            const email = req.body.email;
+            const filter = { email }
+            const updateDoc = {
+                $set: {
+                    lastSignInTime: req.body.lastSignInTime
+                }
+            }
+            const result = await usersCollections.updateOne(filter, updateDoc)
+            res.send(result)
+        })
+
+        app.post('/users', async (req, res) => {
+            const newUser = req.body
+            const result = await usersCollections.insertOne(newUser)
+            res.send(result)
+        })
+
+        app.delete('/users/:id', async (req, res) => {
+            const id = req.params.id
+            const query = { _id: new ObjectId(id) }
+            const result = await usersCollections.deleteOne(query);
             res.send(result)
         })
 
